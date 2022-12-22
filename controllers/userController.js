@@ -132,12 +132,24 @@ const upload = multer({ dest: 'uploads/' });
 //   }
 // });
 
-const getUserInfo = async (req, res, next) => {
+// Get the friends of a user
+const get_friends = async (req, res, next) => {
   try {
     const friend_list = await User.findById(req.session.user._id).populate(
       'friends'
     );
-    return res.json(friend_list);
+    return res.json(friend_list.friends);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+const search_user = async (req, res, next) => {
+  try {
+    const find_user = await User.find({
+      name: new RegExp(`^${req.body.search_name}`, 'i'),
+    });
+    return res.json(find_user);
   } catch (err) {
     return res.json({ message: err.message });
   }
@@ -148,5 +160,6 @@ module.exports = {
   log_in,
   log_out,
   is_logged_in,
-  uploadPicture,
+  get_friends,
+  search_user,
 };
