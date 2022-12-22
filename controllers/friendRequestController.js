@@ -69,7 +69,52 @@ const reject_friend = async (req, res) => {
   }
 };
 
+// Shows the request as a recipient
+const show_recipient_request = async (req, res) => {
+  try {
+    const friendRequests = await FriendRequest.find({
+      recipient: req.session.user._id,
+    });
+
+    return res.json(friendRequests);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+// shows outgoing requests
+const show_sender_request = async (req, res) => {
+  try {
+    const friendRequests = await FriendRequest.find({
+      sender: req.session.user._id,
+    });
+
+    return res.json(friendRequests);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+// Send friend request
+const send_request = async (req, res) => {
+  try {
+    const friendRequest = new FriendRequest({
+      sender: req.session.user._id,
+      recipient: req.params.id,
+    });
+
+    friendRequest.save();
+
+    return res.json('sent');
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
 module.exports = {
   accept_friend,
   reject_friend,
+  show_recipient_request,
+  show_sender_request,
+  send_request,
 };

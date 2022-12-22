@@ -9,6 +9,7 @@ const PostSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   likes: { type: Number, default: 0 },
+  likedByUser: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
 module.exports = mongoose.model('Post', PostSchema);

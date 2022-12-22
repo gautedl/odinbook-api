@@ -14,7 +14,12 @@ const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
+const FacebookStrategy = require('passport-facebook').Strategy;
+
 const User = require('./models/user');
+
+const odinbookRouter = require('./routes/odinbook');
+const indexRouter = require('./routes/index');
 
 const app = express();
 
@@ -99,6 +104,34 @@ passport.use(
   )
 );
 
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: 'http://localhost:3001/auth/facebook/callback',
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        //Find user in db by their Facebook ID
+        let user = await User.findOne({ facebookId: profile.id });
+
+        if (!user) {
+          user = await User.create({
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            facebookId: profile.id,
+          });
+        }
+
+        done(null, user);
+      } catch (err) {
+        done(err);
+      }
+    }
+  )
+);
+
 passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
@@ -121,9 +154,12 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 /* GET home page. */
-app.get('/', function (req, res) {
-  res.render('index');
-});
+// app.get('/', function (req, res) {
+//   res.render('index');
+// });
+
+app.use('/', indexRouter);
+app.use('/odinbook', odinbookRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

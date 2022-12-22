@@ -155,6 +155,15 @@ const search_user = async (req, res, next) => {
   }
 };
 
+const get_user = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    return res.json(user);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
 module.exports = {
   sign_up,
   log_in,
@@ -162,4 +171,5 @@ module.exports = {
   is_logged_in,
   get_friends,
   search_user,
+  get_user,
 };

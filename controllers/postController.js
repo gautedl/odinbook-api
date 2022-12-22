@@ -92,9 +92,17 @@ const get_likes_post = async (req, res) => {
 
 // Add a like to the post
 const post_like = (req, res, next) => {
+  const post = Post.findById(req.params.id);
+
+  // Checks if the post is already liked by the user
+  if (post.likedByUser.includes(req.session.id)) {
+    return res.json('already liked');
+  }
+
   Post.findByIdAndUpdate(
     req.params.id,
     { $inc: { likes: 1 } },
+    { $push: { likedByUser: req.session.user } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
