@@ -10,9 +10,10 @@ const multer = require('multer');
 
 // creates a user
 const sign_up = [
-  body('email', 'username must not be empty')
+  body('email', 'Must be a valid email')
     .trim()
     .isLength({ min: 1 })
+    .isEmail()
     .escape(),
   body('password')
     .trim()
@@ -23,6 +24,7 @@ const sign_up = [
     .custom((value, { req }) => value === req.body.confirmPassword)
     .withMessage('Passwords do not match')
     .escape(),
+  body('name', 'Name must not be empty').trim().isLength({ min: 1 }).escape(),
 
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -41,6 +43,7 @@ const sign_up = [
         return next(err);
       }
       const user = new User({
+        name: req.body.name,
         email: req.body.email,
         password: hashedPassword,
         createdAt: new Date(),

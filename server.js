@@ -18,7 +18,6 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 
 const User = require('./models/user');
 
-const odinbookRouter = require('./routes/odinbook');
 const indexRouter = require('./routes/index');
 
 const app = express();
@@ -159,7 +158,6 @@ app.use(express.urlencoded({ extended: false }));
 // });
 
 app.use('/', indexRouter);
-app.use('/odinbook', odinbookRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
