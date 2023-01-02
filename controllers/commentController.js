@@ -84,10 +84,16 @@ const delete_all_comments = async (req, res) => {
 };
 
 // Like comment
-const comment_like = (req, res, next) => {
+const comment_like = async (req, res, next) => {
+  const comment = await Comment.findById(req.params.id);
+
+  // Checks if the comment is already liked by the user
+  if (comment.likedByUser.includes(req.session.id)) {
+    return res.json('already liked');
+  }
   Comment.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.session.id } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });

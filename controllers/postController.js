@@ -28,6 +28,19 @@ const friends_posts = async (req, res, next) => {
   }
 };
 
+// Get own posted posts
+const get_own_posts = async (req, res, next) => {
+  try {
+    const post_list = await Post.find({ user: req.session.user._id }).populate(
+      'comments'
+    );
+
+    return res.json(post_list);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
 // Creates a post
 const create_post = [
   body('text', 'Text must not be empty').trim().isLength({ min: 1 }).escape(),
@@ -91,8 +104,8 @@ const get_likes_post = async (req, res) => {
 };
 
 // Add a like to the post
-const post_like = (req, res, next) => {
-  const post = Post.findById(req.params.id);
+const post_like = async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
 
   // Checks if the post is already liked by the user
   if (post.likedByUser.includes(req.session.id)) {
@@ -101,8 +114,7 @@ const post_like = (req, res, next) => {
 
   Post.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 } },
-    { $push: { likedByUser: req.session.user } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.session.id } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
@@ -118,4 +130,5 @@ module.exports = {
   edit_post,
   get_likes_post,
   post_like,
+  get_own_posts,
 };

@@ -31,6 +31,7 @@ router.get('/home/user/:id', user_controller.get_user);
 /// POST ROUTES ///
 router.get('/post/get_all_posts', post_controller.all_posts);
 router.get('/post/get_friends_posts', post_controller.friends_posts);
+router.get('/post/get_own_posts', post_controller.get_own_posts);
 router.post('/post/create_new_post', post_controller.create_post);
 router.post('/post/:id/edit_post', post_controller.edit_post);
 router.get('/post/:id/get_likes', post_controller.get_likes_post);
