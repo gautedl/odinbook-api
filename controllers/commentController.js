@@ -88,12 +88,12 @@ const comment_like = async (req, res, next) => {
   const comment = await Comment.findById(req.params.id);
 
   // Checks if the comment is already liked by the user
-  if (comment.likedByUser.includes(req.session.id)) {
+  if (comment.likedByUser.includes(req.session.user._id)) {
     return res.json('already liked');
   }
   Comment.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 }, $push: { likedByUser: req.session.id } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.session.user._id } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
@@ -110,6 +110,26 @@ const get_likes_comment = async (req, res) => {
   } catch (err) {
     return res.json({ message: err.message });
   }
+};
+
+// Dislikes the comment
+const comment_dislike = async (req, res, next) => {
+  const comment = await Comment.findById(req.params.id);
+
+  // Checks if the comment is already liked by the user
+  if (!comment.likedByUser.includes(req.session.user._id)) {
+    return res.json({ message: 'Comment Not Liked' });
+  }
+
+  Comment.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { likes: -1 }, $pull: { likedByUser: req.session.user._id } },
+    {},
+    function (err, result) {
+      if (err) return res.json({ message: err.message });
+      return res.json('Disliked!');
+    }
+  );
 };
 
 module.exports = {

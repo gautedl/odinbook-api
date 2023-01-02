@@ -108,17 +108,37 @@ const post_like = async (req, res, next) => {
   const post = await Post.findById(req.params.id);
 
   // Checks if the post is already liked by the user
-  if (post.likedByUser.includes(req.session.id)) {
-    return res.json('already liked');
+  if (post.likedByUser.includes(req.session.user._id)) {
+    return res.json({ message: 'Already liked' });
   }
 
   Post.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 }, $push: { likedByUser: req.session.id } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.session.user._id } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
       return res.json('Liked!');
+    }
+  );
+};
+
+// Dislikes the post
+const post_dislike = async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+
+  // Checks if the post is already liked by the user
+  if (!post.likedByUser.includes(req.session.user._id)) {
+    return res.json({ message: 'Post Not Liked' });
+  }
+
+  Post.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { likes: -1 }, $pull: { likedByUser: req.session.user._id } },
+    {},
+    function (err, result) {
+      if (err) return res.json({ message: err.message });
+      return res.json('Disliked!');
     }
   );
 };
@@ -131,4 +151,5 @@ module.exports = {
   get_likes_post,
   post_like,
   get_own_posts,
+  post_dislike,
 };

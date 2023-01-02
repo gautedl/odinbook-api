@@ -36,6 +36,7 @@ router.post('/post/create_new_post', post_controller.create_post);
 router.post('/post/:id/edit_post', post_controller.edit_post);
 router.get('/post/:id/get_likes', post_controller.get_likes_post);
 router.post('/post/:id/like_post', post_controller.post_like);
+router.post('/post/:id/dislike_post', post_controller.post_dislike);
 
 /// COMMENT ROUTES ///
 router.post('/comment/:id/create_comment', comment_controller.comment_create);
