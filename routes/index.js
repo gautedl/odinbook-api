@@ -33,6 +33,10 @@ router.get('/post/get_all_posts', post_controller.all_posts);
 router.get('/post/get_friends_posts', post_controller.friends_posts);
 router.get('/post/get_own_posts', post_controller.get_own_posts);
 router.post('/post/create_new_post', post_controller.create_post);
+router.get(
+  '/post/get_display_posts',
+  post_controller.get_friends_and_own_posts
+);
 router.post('/post/:id/edit_post', post_controller.edit_post);
 router.get('/post/:id/get_likes', post_controller.get_likes_post);
 router.post('/post/:id/like_post', post_controller.post_like);
@@ -48,8 +52,8 @@ router.post('/comment/:id/delete_all', comment_controller.delete_all_comments);
 // router.post('/comment/:id/post_delete', comment_controller.delete_comment_post);
 
 /// FRIEND REQUEST ROUTES ///
-router.post('/friend_req/accept', friendRequest_controller.accept_friend);
-router.post('/friend_req/reject', friendRequest_controller.reject_friend);
+router.post('/friend_req/accept/:id', friendRequest_controller.accept_friend);
+router.post('/friend_req/reject/:id', friendRequest_controller.reject_friend);
 router.get(
   '/friend_request/show_recipient',
   friendRequest_controller.show_recipient_request

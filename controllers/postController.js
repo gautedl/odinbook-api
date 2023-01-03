@@ -22,6 +22,7 @@ const friends_posts = async (req, res, next) => {
       .populate('user')
       .populate('comments');
 
+    if (post_list.length === 0) return res.json('No posts');
     return res.json(post_list);
   } catch (err) {
     return res.json({ message: err.message });
@@ -35,7 +36,37 @@ const get_own_posts = async (req, res, next) => {
       'comments'
     );
 
+    if (post_list.length === 0) return res.json('No posts');
     return res.json(post_list);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+const get_friends_and_own_posts = async (req, res, next) => {
+  try {
+    const post_list = await Post.find({ user: req.session.user._id })
+      .populate('user')
+      .populate('comments');
+
+    const friend_list = await User.findById(req.session.user._id).populate(
+      'friends'
+    );
+    const post_list_friends = await Post.find({
+      user: { $in: friend_list.friends },
+    })
+      .populate('user')
+      .populate('comments');
+
+    const all_posts = [...post_list_friends, ...post_list];
+
+    const sorted_list = (all_posts) =>
+      all_posts.sort(({ createdAt: a }, { createdAt: b }) =>
+        a > b ? -1 : a < b ? 1 : 0
+      );
+
+    if (all_posts.length === 0) return res.json('No posts');
+    return res.json(sorted_list(all_posts));
   } catch (err) {
     return res.json({ message: err.message });
   }
@@ -152,4 +183,5 @@ module.exports = {
   post_like,
   get_own_posts,
   post_dislike,
+  get_friends_and_own_posts,
 };

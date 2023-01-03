@@ -24,13 +24,13 @@ const accept_friend = async (req, res) => {
     await friendRequest.save();
 
     // Updates friend list of recipient
-    User.updateOne(
+    await User.updateOne(
       { _id: req.session.user._id },
       { $push: { friends: friendRequest.sender } }
     );
 
     //Updates friend list of sender
-    User.updateOne(
+    await User.updateOne(
       { _id: friendRequest.sender },
       { $push: { friends: friendRequest.recipient } }
     );
@@ -99,7 +99,8 @@ const show_sender_request = async (req, res) => {
 const send_request = async (req, res) => {
   try {
     const friendRequest = new FriendRequest({
-      sender: req.session.user._id,
+      // sender: req.session.user._id,
+      sender: req.body.user,
       recipient: req.params.id,
     });
 

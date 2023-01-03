@@ -138,5 +138,6 @@ module.exports = {
   comment_like,
   get_likes_comment,
   delete_all_comments,
+  comment_dislike,
   //   delete_comment_post,
 };
