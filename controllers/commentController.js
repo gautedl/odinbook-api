@@ -16,16 +16,16 @@ const comment_create = [
       const comment = new Comment({
         text: req.body.text,
         createdAt: new Date(),
-        user: req.req.session.user,
+        user: req.session.user,
       });
 
       try {
-        const savedComment = await comment.save();
+        await comment.save();
         const updatePost = await Post.updateOne(
           { _id: req.params.id },
-          { $push: { comments: savedComment } }
+          { $push: { comments: comment } }
         );
-        return res.json(updatePost);
+        return res.json('posted');
       } catch (err) {
         return res.json({ message: err.message });
       }

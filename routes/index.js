@@ -7,6 +7,8 @@ const post_controller = require('../controllers/postController');
 const user_controller = require('../controllers/userController');
 const friendRequest_controller = require('../controllers/friendRequestController');
 
+const User = require('../models/user');
+
 /// USER ROUTES ///
 // Redirect the user to Facebook for authentication
 router.get('/auth/facebook', passport.authenticate('facebook'));
@@ -27,6 +29,49 @@ router.post('/log_out', user_controller.log_out);
 router.get('/user/getFriends', user_controller.get_friends);
 router.post('/search_user', user_controller.search_user);
 router.get('/home/user/:id', user_controller.get_user);
+const fs = require('fs');
+const multer = require('multer');
+const { body, validationResult } = require('express-validator');
+
+// const upload = multer({ dest: 'uploads/' });
+
+const Storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({
+  storage: Storage,
+});
+
+router.post(
+  '/user/upload_profile_picture',
+  upload.single('profilePicture'),
+  async (req, res) => {
+    try {
+      console.log(req.file);
+      const user = await User.updateOne(
+        { _id: req.session.user._id },
+        {
+          profilePicture: {
+            data: fs.readFileSync('uploads/' + req.file.filename),
+            contentType: req.file.mimetype,
+          },
+        }
+      );
+
+      console.log(user);
+
+      return res.json('Updated');
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
 
 /// POST ROUTES ///
 router.get('/post/get_all_posts', post_controller.all_posts);
@@ -65,5 +110,6 @@ router.get(
 );
 
 router.post('/friend_req/:id/send_req', friendRequest_controller.send_request);
+router.get('/friend_request/:id/find', friendRequest_controller.find_request);
 
 module.exports = router;

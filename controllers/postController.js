@@ -47,7 +47,13 @@ const get_friends_and_own_posts = async (req, res, next) => {
   try {
     const post_list = await Post.find({ user: req.session.user._id })
       .populate('user')
-      .populate('comments');
+      .populate('comments')
+      .populate([
+        {
+          path: 'comments',
+          populate: { path: 'user' },
+        },
+      ]);
 
     const friend_list = await User.findById(req.session.user._id).populate(
       'friends'
@@ -56,7 +62,13 @@ const get_friends_and_own_posts = async (req, res, next) => {
       user: { $in: friend_list.friends },
     })
       .populate('user')
-      .populate('comments');
+      .populate('comments')
+      .populate([
+        {
+          path: 'comments',
+          populate: { path: 'user' },
+        },
+      ]);
 
     const all_posts = [...post_list_friends, ...post_list];
 

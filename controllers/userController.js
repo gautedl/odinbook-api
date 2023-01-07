@@ -7,6 +7,12 @@ const passport = require('passport');
 require('dotenv').config();
 const session = require('express-session');
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+const upload = multer({ dest: 'uploads/' });
+
+const upload_photo = 12;
 
 // creates a user
 const sign_up = [
@@ -113,28 +119,6 @@ const log_out = (req, res, next) => {
   });
 };
 
-// REWRITE
-// Set up multer to handle file uploads
-const upload = multer({ dest: 'uploads/' });
-
-//Update a user's pfp, use patch.
-// const uploadPicture = upload.single('profilePicture');
-
-// router.patch('/profile-picture', uploadPicture, async (req, res) => {
-//   try {
-//     // Find the user
-//     const user = await User.findById(req.user._id);
-
-//     // Update the user's profile picture
-//     user.profilePicture = req.file.buffer;
-//     await user.save();
-
-//     res.send({ message: 'Profile picture updated!' });
-//   } catch (error) {
-//     res.status(500).send({ message: 'Error updating profile picture.' });
-//   }
-// });
-
 // Get the friends of a user
 const get_friends = async (req, res, next) => {
   try {
@@ -175,4 +159,6 @@ module.exports = {
   get_friends,
   search_user,
   get_user,
+  upload_photo,
+  // profile_picture,
 };

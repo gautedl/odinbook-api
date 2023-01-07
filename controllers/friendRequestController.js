@@ -74,7 +74,9 @@ const show_recipient_request = async (req, res) => {
   try {
     const friendRequests = await FriendRequest.find({
       recipient: req.session.user._id,
-    });
+    })
+      .populate('sender')
+      .populate('recipient');
 
     return res.json(friendRequests);
   } catch (err) {
@@ -99,8 +101,8 @@ const show_sender_request = async (req, res) => {
 const send_request = async (req, res) => {
   try {
     const friendRequest = new FriendRequest({
-      // sender: req.session.user._id,
-      sender: req.body.user,
+      sender: req.session.user._id,
+      // sender: req.body.user,
       recipient: req.params.id,
     });
 
@@ -112,10 +114,35 @@ const send_request = async (req, res) => {
   }
 };
 
+const find_request = async (req, res) => {
+  try {
+    const friendRequest_send = await FriendRequest.findOne({
+      sender: req.session.user._id,
+      recipient: req.params.id,
+    });
+    const friendRequest_received = await FriendRequest.findOne({
+      sender: req.params.id,
+      recipient: req.session.user._id,
+    });
+
+    if (friendRequest_send) {
+      return res.json('Request sent');
+    }
+    if (friendRequest_received) {
+      return res.json('Request received');
+    }
+
+    return res.json('Not sent');
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
 module.exports = {
   accept_friend,
   reject_friend,
   show_recipient_request,
   show_sender_request,
   send_request,
+  find_request,
 };
