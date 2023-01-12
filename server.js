@@ -10,16 +10,21 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bodyParser = require('body-parser');
+const cookieSession = require('cookie-session');
+
+const cors = require('cors');
 
 const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
 const FacebookStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const User = require('./models/user');
 
 const indexRouter = require('./routes/index');
+const authRoutes = require('./routes/auth-routes');
 
 const app = express();
 
@@ -34,6 +39,14 @@ db.on('error', console.error.bind(console, 'MongoDB connection error'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// app.use(
+//   cookieSession({
+//     name: 'session',
+//     keys: [process.env.COOKIE_KEY],
+//     maxAge: 24 * 60 * 60 * 100,
+//   })
+// );
+
 app.use(logger('dev'));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -41,6 +54,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  cors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // allow session cookie from browser to pass through
+  })
+);
+
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept'
+//   );
+//   next();
+// });
 
 // Passport auth
 passport.use(
@@ -111,28 +140,41 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: 'http://localhost:3001/auth/facebook/callback',
+      callbackURL: '/auth/facebook/callback',
+      profileFields: ['id', 'displayName', 'photos', 'email'],
     },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        //Find user in db by their Facebook ID
-        let user = await User.findOne({ facebookId: profile.id });
-
-        if (!user) {
-          user = await User.create({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            facebookId: profile.id,
-          });
+    async function (accessToken, refreshToken, profile, done) {
+      User.findOrCreate(
+        { facebookId: profile.id },
+        {
+          name: profile._json.first_name,
+          email: profile._json.email,
+          profilePicture: profile.photos[0].value,
+        },
+        function (error, user) {
+          return done(error, user);
         }
-
-        done(null, user);
-      } catch (err) {
-        done(err);
-      }
+      );
     }
   )
 );
+
+// passport.use(
+//   new GoogleStrategy(
+//     {
+//       clientID: process.env.GOOGLE_APP_ID,
+//       clientSecret: process.env.GOOGLE_APP_SECRET,
+//       callbackURL: 'http://localhost:3001/auth/facebook/callback',
+//       profileFields: ['id', 'displayName', 'photos', 'email'],
+//     },
+//     function (accessToken, refreshToken, profile, cb) {
+//       //Find user in db by their Facebook ID
+//       User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+//         return cb(err, user);
+//       });
+//     }
+//   )
+// );
 
 passport.serializeUser(function (user, done) {
   done(null, user.id);
@@ -152,7 +194,7 @@ app.use(
   })
 );
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 /* GET home page. */
@@ -161,6 +203,30 @@ app.use(express.urlencoded({ extended: false }));
 // });
 
 app.use('/', indexRouter);
+app.use('/auth', authRoutes);
+
+// const authCheck = (req, res, next) => {
+//   if (!req.user) {
+//     res.status(401).json({
+//       authenticated: false,
+//       message: 'user has not been authenticated',
+//     });
+//   } else {
+//     next();
+//   }
+// };
+
+// // if it's already login, send the profile response,
+// // otherwise, send a 401 response that the user is not authenticated
+// // authCheck before navigating to home page
+// app.get('/', authCheck, (req, res) => {
+//   res.status(200).json({
+//     authenticated: true,
+//     message: 'user successfully authenticated',
+//     user: req.user,
+//     cookies: req.cookies,
+//   });
+// });
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -13,6 +13,7 @@ const UserSchema = new Schema({
   profilePicture: { data: Buffer, contentType: String },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   facebookId: { type: String },
+  about: { type: String, maxLength: 400 },
 });
 
 module.exports = mongoose.model('User', UserSchema);

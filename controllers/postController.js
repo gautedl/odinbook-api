@@ -37,7 +37,31 @@ const get_own_posts = async (req, res, next) => {
     );
 
     if (post_list.length === 0) return res.json('No posts');
-    return res.json(post_list);
+
+    const sorted_list = (post_list) =>
+      post_list.sort(({ createdAt: a }, { createdAt: b }) =>
+        a > b ? -1 : a < b ? 1 : 0
+      );
+    return res.json(sorted_list(post_list));
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+// Get users posted posts
+const get_user_posts = async (req, res, next) => {
+  try {
+    const post_list = await Post.find({ user: req.params.id }).populate(
+      'comments'
+    );
+
+    if (post_list.length === 0) return res.json('No posts');
+
+    const sorted_list = (post_list) =>
+      post_list.sort(({ createdAt: a }, { createdAt: b }) =>
+        a > b ? -1 : a < b ? 1 : 0
+      );
+    return res.json(sorted_list(post_list));
   } catch (err) {
     return res.json({ message: err.message });
   }
@@ -196,4 +220,5 @@ module.exports = {
   get_own_posts,
   post_dislike,
   get_friends_and_own_posts,
+  get_user_posts,
 };

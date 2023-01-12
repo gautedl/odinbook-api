@@ -144,12 +144,48 @@ const search_user = async (req, res, next) => {
 
 const get_user = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).populate('friends');
     return res.json(user);
   } catch (err) {
     return res.json({ message: err.message });
   }
 };
+
+const get_current_user = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    return res.json(user);
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
+const edit_about = [
+  body('about')
+    .trim()
+    .isLength({ max: 400 })
+    .withMessage('Max length is 400 chars')
+    .escape(),
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(errors.array());
+    }
+    try {
+      const user = await User.updateOne(
+        { _id: req.session.user._id },
+        {
+          about: req.body.about,
+          _id: req.session.user._id,
+        }
+      );
+
+      return res.json('updated');
+    } catch (err) {
+      return res.json({ message: err.message });
+    }
+  },
+];
 
 module.exports = {
   sign_up,
@@ -160,5 +196,5 @@ module.exports = {
   search_user,
   get_user,
   upload_photo,
-  // profile_picture,
+  get_current_user,
 };

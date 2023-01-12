@@ -124,15 +124,34 @@ const find_request = async (req, res) => {
       sender: req.params.id,
       recipient: req.session.user._id,
     });
+    console.log(friendRequest_send);
+    console.log(friendRequest_received);
 
-    if (friendRequest_send) {
-      return res.json('Request sent');
+    if (friendRequest_received === null && friendRequest_send === null) {
+      return res.json('Not sent');
     }
-    if (friendRequest_received) {
+
+    if (friendRequest_received === null) {
+      if (friendRequest_send.status === 'accepted') {
+        return res.json('Friends');
+      }
+
+      if (friendRequest_send === 'pending') {
+        return res.json('Request sent');
+      }
+
+      return res.json('Request sent');
+    } else if (friendRequest_send === null) {
+      if (friendRequest_received.status === 'accepted') {
+        return res.json('Friends');
+      }
+
+      if (friendRequest_received === 'pending') {
+        return res.json('Request received');
+      }
+
       return res.json('Request received');
     }
-
-    return res.json('Not sent');
   } catch (err) {
     return res.json({ message: err.message });
   }
