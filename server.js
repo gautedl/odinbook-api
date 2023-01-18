@@ -28,6 +28,8 @@ const authRoutes = require('./routes/auth-routes');
 
 const app = express();
 
+const PORT = process.env.PORT || 3001;
+
 // Connect to mongoose
 const mongoDB = process.env.MONGO_URI;
 mongoose.set('strictQuery', true);
@@ -230,6 +232,6 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-app.listen(3001, () => {
-  console.log('Server started on port 3001');
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });
