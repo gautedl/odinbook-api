@@ -63,6 +63,10 @@ const reject_friend = async (req, res) => {
     friendRequest.status = 'rejected';
     await friendRequest.save();
 
+    if (friendRequest.status === 'rejected') {
+      await friendRequest.delete();
+    }
+
     return res.json('rejected');
   } catch (err) {
     return res.json({ message: err.message });

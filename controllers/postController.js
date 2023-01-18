@@ -32,9 +32,9 @@ const friends_posts = async (req, res, next) => {
 // Get own posted posts
 const get_own_posts = async (req, res, next) => {
   try {
-    const post_list = await Post.find({ user: req.session.user._id }).populate(
-      'comments'
-    );
+    const post_list = await Post.find({ user: req.session.user._id })
+      .populate('comments')
+      .populate('user');
 
     if (post_list.length === 0) return res.json('No posts');
 
@@ -51,9 +51,15 @@ const get_own_posts = async (req, res, next) => {
 // Get users posted posts
 const get_user_posts = async (req, res, next) => {
   try {
-    const post_list = await Post.find({ user: req.params.id }).populate(
-      'comments'
-    );
+    const post_list = await Post.find({ user: req.params.id })
+      .populate('comments')
+      .populate('user')
+      .populate([
+        {
+          path: 'comments',
+          populate: { path: 'user' },
+        },
+      ]);
 
     if (post_list.length === 0) return res.json('No posts');
 
@@ -121,11 +127,13 @@ const create_post = [
       const post = new Post({
         text: req.body.text,
         createdAt: new Date(),
-        user: req.session.user,
+        user: req.session.user._id,
       });
       try {
-        const savedPost = await post.save();
-        return res.json('posted');
+        await post.save();
+        await post.populate('user');
+
+        return res.json({ message: 'posted', post: post });
       } catch (err) {
         return res.json({ message: err.message });
       }

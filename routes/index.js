@@ -38,12 +38,10 @@ router.get('/user/getFriends', user_controller.get_friends);
 router.post('/search_user', user_controller.search_user);
 router.get('/home/user/:id', user_controller.get_user);
 router.get('/user/get_current_user', user_controller.get_current_user);
+router.post('/user/edit_about_user', user_controller.edit_about);
 
 const fs = require('fs');
 const multer = require('multer');
-const { body, validationResult } = require('express-validator');
-
-// const upload = multer({ dest: 'uploads/' });
 
 const Storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -63,7 +61,6 @@ router.post(
   upload.single('profilePicture'),
   async (req, res) => {
     try {
-      console.log(req.file);
       const user = await User.updateOne(
         { _id: req.session.user._id },
         {
@@ -74,9 +71,11 @@ router.post(
         }
       );
 
-      console.log(user);
-
-      return res.json('Updated');
+      return res.json({
+        msg: 'Updated',
+        route: fs.readFileSync('uploads/' + req.file.filename),
+        mimetype: req.file.mimetype,
+      });
     } catch (err) {
       console.log(err);
     }

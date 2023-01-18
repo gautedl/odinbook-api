@@ -153,7 +153,7 @@ const get_user = async (req, res, next) => {
 
 const get_current_user = async (req, res, next) => {
   try {
-    const user = await User.findById(req.session.user._id);
+    const user = await User.findById(req.session.user._id).populate('friends');
     return res.json(user);
   } catch (err) {
     return res.json({ message: err.message });
@@ -167,6 +167,7 @@ const edit_about = [
     .withMessage('Max length is 400 chars')
     .escape(),
   async (req, res, next) => {
+    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.json(errors.array());
@@ -197,4 +198,5 @@ module.exports = {
   get_user,
   upload_photo,
   get_current_user,
+  edit_about,
 };

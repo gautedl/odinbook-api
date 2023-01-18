@@ -62,15 +62,6 @@ app.use(
   })
 );
 
-// app.use(function (req, res, next) {
-//   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   );
-//   next();
-// });
-
 // Passport auth
 passport.use(
   'login',
@@ -196,11 +187,6 @@ app.use(
 app.use(passport.initialize());
 // app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
-
-/* GET home page. */
-// app.get('/', function (req, res) {
-//   res.render('index');
-// });
 
 app.use('/', indexRouter);
 app.use('/auth', authRoutes);
