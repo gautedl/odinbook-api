@@ -11,6 +11,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
+const MongoStore = require('connect-mongo');
 
 const cors = require('cors');
 
@@ -58,7 +59,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   cors({
-    origin: 'https://gautedl.github.io',
+    origin: [
+      'https://gautedl.github.io',
+      'http://localhost:3000/odinbook-frontend',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // allow session cookie from browser to pass through
   })
@@ -182,6 +186,7 @@ passport.deserializeUser(function (id, done) {
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     resave: false,
     saveUninitialized: true,
   })
