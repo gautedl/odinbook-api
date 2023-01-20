@@ -16,7 +16,7 @@ const comment_create = [
       const comment = new Comment({
         text: req.body.text,
         createdAt: new Date(),
-        user: req.session.user._id,
+        user: req.body.userId,
       });
 
       try {
@@ -91,12 +91,12 @@ const comment_like = async (req, res, next) => {
   const comment = await Comment.findById(req.params.id);
 
   // Checks if the comment is already liked by the user
-  if (comment.likedByUser.includes(req.session.user._id)) {
+  if (comment.likedByUser.includes(req.body.userId)) {
     return res.json('already liked');
   }
   Comment.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 }, $push: { likedByUser: req.session.user._id } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.body.userId } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
@@ -120,13 +120,13 @@ const comment_dislike = async (req, res, next) => {
   const comment = await Comment.findById(req.params.id);
 
   // Checks if the comment is already liked by the user
-  if (!comment.likedByUser.includes(req.session.user._id)) {
+  if (!comment.likedByUser.includes(req.body.userId)) {
     return res.json({ message: 'Comment Not Liked' });
   }
 
   Comment.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: -1 }, $pull: { likedByUser: req.session.user._id } },
+    { $inc: { likes: -1 }, $pull: { likedByUser: req.body.userId } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });

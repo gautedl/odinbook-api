@@ -64,6 +64,35 @@ const sign_up = [
 ];
 
 // Accepts POST requests to the /login endpoint
+// const log_in = async function (req, res) {
+//   // Get the user's credentials from the request body
+//   const { username, password } = req.body;
+
+//   // Authenticate the user using passport
+//   passport.authenticate('login', async function (err, user) {
+//     if (err || !user) {
+//       // If there is an error or the user is not found, return an error
+//       return res.status(401).json({
+//         message: 'Authentication failed',
+//         error: err,
+//       });
+//     } else {
+//       // If the user is found, generate a JWT token for the user and return it in the response
+//       const token = jwt.sign(
+//         {
+//           user: user,
+//         },
+//         process.env.JWT_SECRET
+//       );
+
+//       return res.json({
+//         token: token,
+//         user: user,
+//       });
+//     }
+//   })(req, res);
+// };
+
 const log_in = async function (req, res, next) {
   // Authenticate the user using passport
   passport.authenticate('login', async function (err, user) {
@@ -76,22 +105,22 @@ const log_in = async function (req, res, next) {
         });
       }
       // If the user is found, generate a JWT token for the user and return it in the response
-      req.login(user, { session: false }, async (error) => {
-        if (error) return next(error);
+      req.login(user, async (error) => {
+        // if (error) return next(error);
 
         const body = { _id: user._id, email: user.email };
 
         const token = jwt.sign(
           {
-            user: body,
+            user: user,
           },
           process.env.JWT_SECRET,
           {
             expiresIn: '1d',
           }
         );
-
-        req.session.user = user;
+        // console.log(token, user);
+        // req.session.user = user;
         return res.json({ token, user });
       });
     } catch (err) {
@@ -100,31 +129,69 @@ const log_in = async function (req, res, next) {
   })(req, res, next);
 };
 
+// Accepts POST requests to the /login endpoint
+// const log_in = async function (req, res, next) {
+//   // Authenticate the user using passport
+//   passport.authenticate('login', async function (err, user) {
+//     try {
+//       if (err || !user) {
+//         // If there is an error or the user is not found, return an error
+//         return res.status(401).json({
+//           message: 'Authentication failed',
+//           error: err,
+//         });
+//       }
+//       // If the user is found, generate a JWT token for the user and return it in the response
+//       req.login(user, { session: false }, async (error) => {
+//         if (error) return next(error);
+
+//         const body = { _id: user._id, email: user.email };
+
+//         const token = jwt.sign(
+//           {
+//             user: body,
+//           },
+//           process.env.JWT_SECRET,
+//           {
+//             expiresIn: '1d',
+//           }
+//         );
+
+//         // req.session.user = user;
+//         return res.json({ token, user });
+//       });
+//     } catch (err) {
+//       return next(err);
+//     }
+//   })(req, res, next);
+// };
+
 // Checks if user is logged in to the server
-const is_logged_in = (req, res) => {
-  if (req.session.user) {
-    return res.json('Logged in');
-  } else {
-    return res.json('Not logged in');
-  }
-};
+// const is_logged_in = (req, res) => {
+//   if (req.session.user) {
+//     return res.json('Logged in');
+//   } else {
+//     return res.json('Not logged in');
+//   }
+// };
 
 // Logs out the user
-const log_out = (req, res, next) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    return res.json('logged out');
-  });
-};
+// const log_out = (req, res, next) => {
+//   try {
+//     req.logout();
+//     req.session = null;
+//     res.clearCookie('session.sig');
+//     return res.json('logged out');
+//     // res.redirect('/');
+//   } catch (err) {
+//     return res.json(err);
+//   }
+// };
 
 // Get the friends of a user
 const get_friends = async (req, res, next) => {
   try {
-    const friend_list = await User.findById(req.session.user._id).populate(
-      'friends'
-    );
+    const friend_list = await User.findById(req.params.id).populate('friends');
     return res.json(friend_list.friends);
   } catch (err) {
     return res.json({ message: err.message });
@@ -151,14 +218,14 @@ const get_user = async (req, res, next) => {
   }
 };
 
-const get_current_user = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.session.user._id).populate('friends');
-    return res.json(user);
-  } catch (err) {
-    return res.json({ message: err.message });
-  }
-};
+// const get_current_user = async (req, res, next) => {
+//   try {
+//     const user = await User.findById(req.session.user._id).populate('friends');
+//     return res.json(user);
+//   } catch (err) {
+//     return res.json({ message: err.message });
+//   }
+// };
 
 const edit_about = [
   body('about')
@@ -174,10 +241,10 @@ const edit_about = [
     }
     try {
       const user = await User.updateOne(
-        { _id: req.session.user._id },
+        { _id: req.params.id },
         {
           about: req.body.about,
-          _id: req.session.user._id,
+          _id: req.params.id,
         }
       );
 
@@ -191,12 +258,12 @@ const edit_about = [
 module.exports = {
   sign_up,
   log_in,
-  log_out,
-  is_logged_in,
+  // log_out,
+  // is_logged_in,
   get_friends,
   search_user,
   get_user,
   upload_photo,
-  get_current_user,
+  // get_current_user,
   edit_about,
 };

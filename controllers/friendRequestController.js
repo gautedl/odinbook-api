@@ -13,9 +13,7 @@ const accept_friend = async (req, res) => {
     }
 
     // Make sure the authenticated user is the recipient of the request
-    if (
-      friendRequest.recipient.toString() !== req.session.user._id.toString()
-    ) {
+    if (friendRequest.recipient.toString() !== req.body.userId.toString()) {
       return res.json({ message: 'Unauthorized' });
     }
 
@@ -25,7 +23,7 @@ const accept_friend = async (req, res) => {
 
     // Updates friend list of recipient
     await User.updateOne(
-      { _id: req.session.user._id },
+      { _id: req.body.userId },
       { $push: { friends: friendRequest.sender } }
     );
 
@@ -53,9 +51,7 @@ const reject_friend = async (req, res) => {
     }
 
     // Make sure the authenticated user is the recipient of the request
-    if (
-      friendRequest.recipient.toString() !== req.session.user._id.toString()
-    ) {
+    if (friendRequest.recipient.toString() !== req.body.id.toString()) {
       return res.json({ message: 'Unauthorized' });
     }
 
@@ -77,7 +73,7 @@ const reject_friend = async (req, res) => {
 const show_recipient_request = async (req, res) => {
   try {
     const friendRequests = await FriendRequest.find({
-      recipient: req.session.user._id,
+      recipient: req.params.id,
     })
       .populate('sender')
       .populate('recipient');
@@ -105,7 +101,7 @@ const show_sender_request = async (req, res) => {
 const send_request = async (req, res) => {
   try {
     const friendRequest = new FriendRequest({
-      sender: req.session.user._id,
+      sender: req.body.userId,
       // sender: req.body.user,
       recipient: req.params.id,
     });
@@ -119,14 +115,15 @@ const send_request = async (req, res) => {
 };
 
 const find_request = async (req, res) => {
+  console.log(req.params);
   try {
     const friendRequest_send = await FriendRequest.findOne({
-      sender: req.session.user._id,
+      sender: req.params.userId,
       recipient: req.params.id,
     });
     const friendRequest_received = await FriendRequest.findOne({
       sender: req.params.id,
-      recipient: req.session.user._id,
+      recipient: req.params.userId,
     });
     console.log(friendRequest_send);
     console.log(friendRequest_received);

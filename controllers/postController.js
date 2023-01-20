@@ -15,9 +15,7 @@ const all_posts = async (req, res, next) => {
 // Get post posted by friends
 const friends_posts = async (req, res, next) => {
   try {
-    const friend_list = await User.findById(req.session.user._id).populate(
-      'friends'
-    );
+    const friend_list = await User.findById(req.params.id).populate('friends');
     const post_list = await Post.find({ user: { $in: friend_list.friends } })
       .populate('user')
       .populate('comments');
@@ -75,7 +73,7 @@ const get_user_posts = async (req, res, next) => {
 
 const get_friends_and_own_posts = async (req, res, next) => {
   try {
-    const post_list = await Post.find({ user: req.session.user._id })
+    const post_list = await Post.find({ user: req.params.id })
       .populate('user')
       .populate('comments')
       .populate([
@@ -85,9 +83,7 @@ const get_friends_and_own_posts = async (req, res, next) => {
         },
       ]);
 
-    const friend_list = await User.findById(req.session.user._id).populate(
-      'friends'
-    );
+    const friend_list = await User.findById(req.params.id).populate('friends');
     const post_list_friends = await Post.find({
       user: { $in: friend_list.friends },
     })
@@ -127,7 +123,7 @@ const create_post = [
       const post = new Post({
         text: req.body.text,
         createdAt: new Date(),
-        user: req.session.user._id,
+        user: req.params.id,
       });
       try {
         await post.save();
@@ -181,15 +177,16 @@ const get_likes_post = async (req, res) => {
 // Add a like to the post
 const post_like = async (req, res, next) => {
   const post = await Post.findById(req.params.id);
+  console.log(req.body);
 
   // Checks if the post is already liked by the user
-  if (post.likedByUser.includes(req.session.user._id)) {
+  if (post.likedByUser.includes(req.params.userID)) {
     return res.json({ message: 'Already liked' });
   }
 
   Post.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: 1 }, $push: { likedByUser: req.session.user._id } },
+    { $inc: { likes: 1 }, $push: { likedByUser: req.params.userID } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });
@@ -203,13 +200,13 @@ const post_dislike = async (req, res, next) => {
   const post = await Post.findById(req.params.id);
 
   // Checks if the post is already liked by the user
-  if (!post.likedByUser.includes(req.session.user._id)) {
+  if (!post.likedByUser.includes(req.params.userID)) {
     return res.json({ message: 'Post Not Liked' });
   }
 
   Post.findByIdAndUpdate(
     req.params.id,
-    { $inc: { likes: -1 }, $pull: { likedByUser: req.session.user._id } },
+    { $inc: { likes: -1 }, $pull: { likedByUser: req.params.userID } },
     {},
     function (err, result) {
       if (err) return res.json({ message: err.message });

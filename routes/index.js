@@ -32,13 +32,13 @@ router.get(
 
 router.post('/login', user_controller.log_in);
 router.post('/sign_up', user_controller.sign_up);
-router.get('/user/isLoggedIn', user_controller.is_logged_in);
-router.get('/log_out', user_controller.log_out);
-router.get('/user/getFriends', user_controller.get_friends);
+// router.get('/user/isLoggedIn', user_controller.is_logged_in);
+// router.get('/log_out', user_controller.log_out);
+router.get('/user/getFriends/:id', user_controller.get_friends);
 router.post('/search_user', user_controller.search_user);
 router.get('/home/user/:id', user_controller.get_user);
-router.get('/user/get_current_user', user_controller.get_current_user);
-router.post('/user/edit_about_user', user_controller.edit_about);
+// router.get('/user/get_current_user', user_controller.get_current_user);
+router.post('/user/edit_about_user/:id', user_controller.edit_about);
 
 const fs = require('fs');
 const multer = require('multer');
@@ -57,12 +57,12 @@ const upload = multer({
 });
 
 router.post(
-  '/user/upload_profile_picture',
+  '/user/upload_profile_picture/:id',
   upload.single('profilePicture'),
   async (req, res) => {
     try {
       const user = await User.updateOne(
-        { _id: req.session.user._id },
+        { _id: req.params.id },
         {
           profilePicture: {
             data: fs.readFileSync('uploads/' + req.file.filename),
@@ -84,17 +84,17 @@ router.post(
 
 /// POST ROUTES ///
 router.get('/post/get_all_posts', post_controller.all_posts);
-router.get('/post/get_friends_posts', post_controller.friends_posts);
+router.get('/post/get_friends_posts/:id', post_controller.friends_posts);
 router.get('/post/get_own_posts', post_controller.get_own_posts);
-router.post('/post/create_new_post', post_controller.create_post);
+router.post('/post/create_new_post/:id', post_controller.create_post);
 router.get(
-  '/post/get_display_posts',
+  '/post/get_display_posts/:id',
   post_controller.get_friends_and_own_posts
 );
 router.post('/post/:id/edit_post', post_controller.edit_post);
 router.get('/post/:id/get_likes', post_controller.get_likes_post);
-router.post('/post/:id/like_post', post_controller.post_like);
-router.post('/post/:id/dislike_post', post_controller.post_dislike);
+router.post('/post/:id/like_post/:userID', post_controller.post_like);
+router.post('/post/:id/dislike_post/:userID', post_controller.post_dislike);
 router.get('/post/get_user_post/:id', post_controller.get_user_posts);
 
 /// COMMENT ROUTES ///
@@ -110,7 +110,7 @@ router.post('/comment/:id/delete_all', comment_controller.delete_all_comments);
 router.post('/friend_req/accept/:id', friendRequest_controller.accept_friend);
 router.post('/friend_req/reject/:id', friendRequest_controller.reject_friend);
 router.get(
-  '/friend_request/show_recipient',
+  '/friend_request/show_recipient/:id',
   friendRequest_controller.show_recipient_request
 );
 
@@ -120,7 +120,10 @@ router.get(
 );
 
 router.post('/friend_req/:id/send_req', friendRequest_controller.send_request);
-router.get('/friend_request/:id/find', friendRequest_controller.find_request);
+router.get(
+  '/friend_request/:id/find/:userId',
+  friendRequest_controller.find_request
+);
 
 /// CONVERSATION ROUTES ///
 router.post('/conversation/find', conversation_controller.find_conversation);

@@ -61,10 +61,10 @@ app.use(
   cors({
     origin: [
       'https://gautedl.github.io',
-      'http://localhost:3000/odinbook-frontend',
+      // 'http://localhost:3000/odinbook-frontend',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // allow session cookie from browser to pass through
+    // credentials: true, // allow session cookie from browser to pass through
   })
 );
 
@@ -183,14 +183,14 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 app.use(passport.initialize());
 // app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
