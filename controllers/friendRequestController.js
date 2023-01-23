@@ -125,8 +125,6 @@ const find_request = async (req, res) => {
       sender: req.params.id,
       recipient: req.params.userId,
     });
-    console.log(friendRequest_send);
-    console.log(friendRequest_received);
 
     if (friendRequest_received === null && friendRequest_send === null) {
       return res.json('Not sent');

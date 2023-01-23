@@ -61,7 +61,7 @@ app.use(
   cors({
     origin: [
       'https://gautedl.github.io',
-      // 'http://localhost:3000/odinbook-frontend',
+      'http://localhost:3000/odinbook-frontend',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     // credentials: true, // allow session cookie from browser to pass through
