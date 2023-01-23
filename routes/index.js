@@ -126,10 +126,33 @@ router.get(
 );
 
 /// CONVERSATION ROUTES ///
-router.post('/conversation/find', conversation_controller.find_conversation);
 router.post(
-  '/conversation/create_new_conversation',
+  '/conversation/find/:id',
+  conversation_controller.find_conversation
+);
+router.post(
+  '/conversation/create_new_conversation/:id',
   conversation_controller.create_new_conversation
+);
+router.post(
+  '/conversation/send_message/:id',
+  conversation_controller.send_message
+);
+router.get(
+  '/conversation/get_all_conversations/:id',
+  conversation_controller.get_all_conversations
+);
+router.get(
+  '/conversation/get_conversation/:id',
+  conversation_controller.get_conversation
+);
+router.post(
+  '/conversation/search_message_in_conversation/:id',
+  conversation_controller.search_message_in_conversation
+);
+router.post(
+  '/conversation/search_message_in_all_users_conversation/:id',
+  conversation_controller.search_message_in_all_users_conversation
 );
 
 module.exports = router;
