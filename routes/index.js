@@ -158,5 +158,17 @@ router.post(
   '/conversation/search_user/:id',
   conversation_controller.search_user_conversation
 );
+router.post(
+  '/conversation/mark_as_read/:id/:userId',
+  conversation_controller.mark_messages_as_read
+);
+router.get(
+  '/conversation/count_unread_messages/:id/:userId',
+  conversation_controller.count_messages
+);
+router.get(
+  '/conversation/count_all_unread_messages/:id',
+  conversation_controller.count_all_unread_messages
+);
 
 module.exports = router;
