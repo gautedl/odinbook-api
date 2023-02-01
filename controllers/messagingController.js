@@ -173,6 +173,75 @@ const search_message_in_all_users_conversation = async (req, res) => {
   }
 };
 
+// Mark a message as read on open
+const mark_messages_as_read = async (req, res) => {
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+
+    if (!conversation) {
+      return res.json({ message: 'Conversation not found' });
+    }
+
+    const messages = await Message.updateMany(
+      {
+        _id: { $in: conversation.messages },
+        receiverId: req.params.userId,
+        read: false,
+      },
+      { $set: { read: true } }
+    );
+
+    return res.json({ messages });
+  } catch (err) {
+    return res.json({ msg: err.message });
+  }
+};
+
+// Count the number of unread messages in a conversation
+const count_messages = async (req, res) => {
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+
+    if (!conversation) {
+      return res.json({ message: 'Conversation not found' });
+    }
+
+    const messages = await Message.find({
+      _id: { $in: conversation.messages },
+      receiverId: req.params.userId,
+      read: false,
+    });
+
+    const lenMessages = messages.length;
+
+    return res.json({ lenMessages });
+  } catch (err) {
+    return res.json({ msg: err.message });
+  }
+};
+
+// Counts the total number of unread messages from a user
+const count_all_unread_messages = async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      users: { $in: req.params.id },
+    }).populate('messages');
+
+    let unreadMessageCount = 0;
+    conversations.forEach((conversation) => {
+      conversation.messages.forEach((message) => {
+        if (message.read === false) {
+          unreadMessageCount++;
+        }
+      });
+    });
+
+    return res.json(unreadMessageCount);
+  } catch (err) {
+    return res.json({ msg: err.message });
+  }
+};
+
 module.exports = {
   find_conversation,
   create_new_conversation,
@@ -182,4 +251,7 @@ module.exports = {
   search_message_in_conversation,
   search_message_in_all_users_conversation,
   search_user_conversation,
+  mark_messages_as_read,
+  count_messages,
+  count_all_unread_messages,
 };
