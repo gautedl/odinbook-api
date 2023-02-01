@@ -99,6 +99,36 @@ const get_conversation = async (req, res) => {
   }
 };
 
+// Search for a conversation with a user
+const search_user_conversation = async (req, res) => {
+  try {
+    const find_user = await User.find({
+      name: new RegExp(`^${req.body.search_user}`, 'i'),
+    });
+
+    const conversation_list = [];
+
+    for (const user of find_user) {
+      const usersID = [user._id, req.params.id];
+
+      const conversation = await Conversation.find({
+        users: { $all: usersID },
+      })
+        .populate('users')
+        .populate('messages');
+
+      if (conversation.length !== 0) conversation_list.push(conversation);
+    }
+
+    if (conversation_list.length === 0)
+      return res.json({ msg: 'no conversation' });
+
+    return res.json({ result: conversation_list, msg: 'done' });
+  } catch (err) {
+    return res.json({ message: err.message });
+  }
+};
+
 // Search for messages in a conversation
 const search_message_in_conversation = async (req, res) => {
   try {
@@ -151,4 +181,5 @@ module.exports = {
   get_conversation,
   search_message_in_conversation,
   search_message_in_all_users_conversation,
+  search_user_conversation,
 };

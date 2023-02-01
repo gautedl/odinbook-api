@@ -154,5 +154,9 @@ router.post(
   '/conversation/search_message_in_all_users_conversation/:id',
   conversation_controller.search_message_in_all_users_conversation
 );
+router.post(
+  '/conversation/search_user/:id',
+  conversation_controller.search_user_conversation
+);
 
 module.exports = router;
